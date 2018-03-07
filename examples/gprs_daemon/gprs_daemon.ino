@@ -48,7 +48,7 @@ unsigned char forceModemReInit =  0;     // Флаг принудительно�
 
           //  Интервалы выполнения задач в минутах от 1 до 65535 (45 дней)
 unsigned int periodConnectionChk=  2;    // Проверки GPRS соединения
-unsigned int periodSensorChk    =  5;    // Снятия показаний датчиков
+unsigned int periodSensorChk    =  3;    // Снятия показаний датчиков
 unsigned int periodDataSend     = 15;    // Отправки данных
 unsigned int periodSmsStatus   =1440;    // Отправки sms
 unsigned int periodNTPSync     =1440;    // NTP синхронизации
@@ -113,8 +113,8 @@ void setup()
     // Ставим начальные значения для запуска всех событий при старте
     minutesBeforeConnectionChk =  0;       
     minutesBeforeSensorChk     =  0;       
-    minutesBeforeDataSend      =  0;       
-    minutesBeforeSmsStatus     =  0;       
+    minutesBeforeDataSend      =  4;
+    minutesBeforeSmsStatus     =  111;       
     minutesBeforeNTPSync       =  2;       
     secondsBeforeUnreadSMSChk  =  1;       
     minutesBeforeBalanceChk    =  0;       
@@ -200,15 +200,14 @@ void loop()
         Serial.println(MoneyBalanceInt);
     }
 
-/*  
-  if( minutesBeforeNTPSync <= 0) {
-    minutesBeforeNTPSync = periodNTPSync;
-    debugOutput("NTPSync");
-    signed char rc = gprsModul.syncNtp(ntpService);
-    Serial.print(" rc=");
-    Serial.println(rc);   
-  }
-*/  
+  
+    if( minutesBeforeNTPSync <= 0) {
+        minutesBeforeNTPSync = periodNTPSync;
+        signed char rc = 0; //gprsModul.syncNtp(ntpService);
+        Serial.print(" rc=");
+        Serial.println(rc);   
+    }
+  
     if( minutesBeforePowerOff <= 0) {
         minutesBeforePowerOff = periodPowerOff;
         gprsModul.powerOff();
@@ -216,17 +215,10 @@ void loop()
         return;
     }
 
-/*
-  if (DataSendTimerM >= DataSendPeriodM) {
-    // sendData....();
-    DataSendTimerM = 0L;
-  }
-  //
-  if (smsStatusTimerM >= smsStatusPeriodM) {
-    sendStatusSMS();
-    smsStatusTimerM = 0L;
-  }
-*/
+    if( minutesBeforeSmsStatus <= 0) {
+        minutesBeforeSmsStatus = periodSmsStatus;
+        sendStatusSMS(PHONE_ADMIN);
+    }
 }
 
 
@@ -316,6 +308,7 @@ uint8_t commandProcessorSms(char* txtSMS, char* SenderID) {
     Serial.print(SenderID);
     Serial.print(";  sms: ");
     Serial.println(txtSMS);
+    sendStatusSMS(SenderID);
     return 0;
 }
 
@@ -329,3 +322,23 @@ void rebootModem(void) {
     Serial.print("\nInit rc=");
     Serial.println(rc);
 }
+
+
+
+void sendStatusSMS(char* phoneNumber) {
+    unsigned int TrySMS = 8; // Количество попыток отправки СМС
+    signed char rc;
+    char   buf[20];
+    char   textMsg[162] = "Hi from Daemon #6!\r\n";
+    gprsModul.readBalance(balanceReq, MoneyBalanceBuf, sizeof(MoneyBalanceBuf), MoneyBalanceInt);
+    strcat(textMsg, gprsModul.getDateTime(buf));
+    strcat(textMsg, " Barometr=");
+    strcat(textMsg, currentPressure);
+    strcat(textMsg, ",temp=");
+    strcat(textMsg, currentBarometrTemp);
+    strcat(textMsg, ",");
+    strcat(textMsg, MoneyBalanceBuf);
+    
+    gprsModul.sendSMS( textMsg, phoneNumber);
+    Serial.println(textMsg);
+    }
