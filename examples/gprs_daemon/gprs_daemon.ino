@@ -113,8 +113,8 @@ void setup()
     // Ставим начальные значения для запуска всех событий при старте
     minutesBeforeConnectionChk =  0;       
     minutesBeforeSensorChk     =  0;       
-    minutesBeforeDataSend      =  4;
-    minutesBeforeSmsStatus     =  111;       
+    minutesBeforeDataSend      =  3;
+    minutesBeforeSmsStatus     =  11111;       
     minutesBeforeNTPSync       =  2;       
     secondsBeforeUnreadSMSChk  =  1;       
     minutesBeforeBalanceChk    =  0;       
@@ -203,7 +203,7 @@ void loop()
   
     if( minutesBeforeNTPSync <= 0) {
         minutesBeforeNTPSync = periodNTPSync;
-        signed char rc = 0; //gprsModul.syncNtp(ntpService);
+        signed char rc = gprsModul.syncNtp(ntpService);
         Serial.print(" rc=");
         Serial.println(rc);   
     }
@@ -341,4 +341,4 @@ void sendStatusSMS(char* phoneNumber) {
     
     gprsModul.sendSMS( textMsg, phoneNumber);
     Serial.println(textMsg);
-    }
+}
