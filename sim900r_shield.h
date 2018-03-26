@@ -86,6 +86,8 @@ public:
                                   char* moneyBalanceBuf, 
                                   int   bufLen,
                                   int&  moneyBalanceInt);
+  unsigned char GPRS::syncNtp (const char* ntpServer);
+  void read_buffer(char* buffer,int count);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -99,86 +101,25 @@ public:
     bool deleteSMS(int index);
 
 
+///////////////////////////////////////////////////////////////////////////////
+///                                                                         ///
+///                                GPRS                                     ///
+///                                                                         ///
+///////////////////////////////////////////////////////////////////////////////
 
-//////////////////////////////////////////////////////
-/// GPRS
-//////////////////////////////////////////////////////
-   /**  Connect the GPRS module to the network.
-     *  @return true if connected, false otherwise
-     */
+unsigned char GPRS::getGprsStatus(char* ipv4Buf);
+unsigned char GPRS::joinGprs(char* ipv4Buf);
+int GPRS::httpGet(char* url, int&  dataLen);
+//void GPRS::disconnectGprs()
+//bool GPRS::connect(Protocol ptl, const char * host, int port, int timeout)
+//bool GPRS::connect(Protocol ptl,const __FlashStringHelper *host, const __FlashStringHelper *port, int timeout)
+//bool GPRS::close()
+//int GPRS::readable(void)
+//int GPRS::wait_readable(int wait_time)
+//int GPRS::wait_writeable(int req_size)
+//int GPRS::send(const char * str, int len)
+//int GPRS::send(const char * str)
 
-//    bool join(const __FlashStringHelper *apn = 0, const __FlashStringHelper *userName = 0, const __FlashStringHelper *passWord = 0);
-     bool join(char* apn = 0, char* = 0, char* = 0, int timeout = 2 * DEFAULT_TIMEOUT);
-
-    /** Disconnect the GPRS module from the network
-     *  @returns
-     */
-    void disconnect(void);
-
-    /** Open a tcp/udp connection with the specified host on the specified port
-     *  @param socket an endpoint of an inter-process communication flow of GPRS module,for SIM900 module, it is in [0,6]
-     *  @param ptl protocol for socket, TCP/UDP can be choosen
-     *  @param host host (can be either an ip address or a name. If a name is provided, a dns request will be established)
-     *  @param port port
-     *  @param timeout wait seconds till connected
-     *  @returns true if successful
-     */
-    bool connect(Protocol ptl, const char * host, int port, int timeout = 2 * DEFAULT_TIMEOUT);
-    bool connect(Protocol ptl, const __FlashStringHelper *host, const __FlashStringHelper *port, int timeout = 2 * DEFAULT_TIMEOUT);
-
-    /** Check if a tcp link is active
-     *  @returns true if successful
-     */
-    bool is_connected(void);
-
-    /** Close a tcp connection
-     *  @returns true if successful
-     */
-    bool close(void);
-
-    /** check if GPRS module is readable or not
-     *  @returns true if readable
-     */
-    int readable(void);
-
-    /** wait a few time to check if GPRS module is readable or not
-     *  @param socket socket
-     *  @param wait_time time of waiting
-     */
-    int wait_readable(int wait_time);
-
-    /** wait a few time to check if GPRS module is writeable or not
-     *  @param socket socket
-     *  @param wait_time time of waiting
-     */
-    int wait_writeable(int req_size);
-
-    int send(const char * str);
-    /** send data to socket
-     *  @param socket socket
-     *  @param str string to be sent
-     *  @param len string length
-     *  @returns return bytes that actually been send
-     */
-    int send(const char * str, int len);
-
-    /** read data from socket
-     *  @param socket socket
-     *  @param buf buffer that will store the data read from socket
-     *  @param len string length need to read from socket
-     *  @returns bytes that actually read
-     */
-    int recv(char* buf, int len);
-
-    /** convert the host to ip
-     *  @param host host ip string, ex. 10.11.12.13
-     *  @param ip long int ip address, ex. 0x11223344
-     *  @returns true if successful
-     */
-    //NOT USED bool gethostbyname(const char* host, uint32_t* ip);
-
-    char* getIPAddress();
-    unsigned long getIPnumber();
 
 private:
     uint8_t _stPin = 3;
